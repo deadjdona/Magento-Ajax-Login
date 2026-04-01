@@ -1090,6 +1090,23 @@ $.position = {
 	}
 };
 
+function createPositionTarget( value ) {
+	if ( typeof value === "string" ) {
+		var trimmed = $.trim ? $.trim( value ) : value.replace( /^\s+|\s+$/g, "" );
+		if ( trimmed.charAt( 0 ) === "<" ) {
+			// Treat as a selector rather than HTML to avoid interpreting untrusted input as markup
+			try {
+				var elements = document.querySelectorAll( trimmed );
+				return $( elements );
+			} catch ( e ) {
+				// If the string is not a valid selector, fall back to an empty jQuery object
+				return $( [] );
+			}
+		}
+	}
+	return $( value );
+}
+
 $.fn.position = function( options ) {
 	if ( !options || !options.of ) {
 		return _position.apply( this, arguments );
@@ -1099,7 +1116,7 @@ $.fn.position = function( options ) {
 	options = $.extend( {}, options );
 
 	var atOffset, targetWidth, targetHeight, targetOffset, basePosition, dimensions,
-		target = $( options.of ),
+		target = createPositionTarget( options.of ),
 		within = $.position.getWithinInfo( options.within ),
 		scrollInfo = $.position.getScrollInfo( within ),
 		collision = ( options.collision || "flip" ).split( " " ),
